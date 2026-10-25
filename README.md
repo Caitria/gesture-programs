@@ -46,6 +46,8 @@ Arduino Uno R3 · 400-point breadboard · 5× LEDs (5 mm) · 5× 220 Ω resistor
 
 Python 3.12 · MediaPipe Hand Landmarker · OpenCV · pySerial · arduino-cli · pynput (honest `LeftMouseDragged` events — see the conductor notes in `air-desktop/PLAN.md` for why that matters) · macOS Accessibility framework via PyObjC.
 
+Tools and ideas borrowed, with thanks: [OpenCV](https://docs.opencv.org/4.13.0/d1/dfb/intro.html) (camera capture and the Portal’s perspective warping), [pynput](https://pynput.readthedocs.io/en/latest/mouse.html) (mouse events macOS accepts as real drags), and the Portal’s concept, which follows @byte0880’s “RETROLENS” demo on TikTok.
+
 Ideas borrowed, with thanks: the One Euro filter (Casiez, Roussel & Vogel, CHI 2012), the Bubble Cursor (Grossman & Balakrishnan, CHI 2005), Steady Clicks (Trewin, Keates & Moffatt, ASSETS 2006). MediaPipe docs: https://developers.google.com/edge/mediapipe/solutions/vision/hand_landmarker
 
 ## Status
