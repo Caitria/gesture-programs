@@ -40,11 +40,11 @@ You run **one command** (`bash ~/demo.sh`) and the sequencer walks you through a
 
 - **Window shows the Immersed "Please Launch" card** → wrong camera number. Q, and rerun the whole script with the other number (`bash ~/demo.sh 2`). 
 - **Act 1 can't find the Uno** → cable first (unplug, replug, watch for the chase-blink), then rerun.
-- **Act 3 cursor frozen** → you probably have both hands up: that's PAUSE by design. Drop to one hand. Or the corner-stop got held — just relaunch the act with `python3 ~/air-desktop/code/mac_conductor.py --camera 1`.
+- **Act 3 cursor frozen** → you probably have both hands up: that's PAUSE by design. Drop to one hand. Or the corner-stop got held — just relaunch the act with `python3 ~/mac-conductor/mac_conductor.py --camera 1`.
 - **Anything else misbehaves** → Q, breathe, rerun that act alone:
   - Act 1: `python3 ~/hand-controlled-led/code/hand_led.py --camera 1`
-  - Act 2: `python3 ~/air-desktop/code/portal.py --camera 1`
-  - Act 3: `python3 ~/air-desktop/code/mac_conductor.py --camera 1`
+  - Act 2: `python3 ~/portal/portal.py --camera 1`
+  - Act 3: `python3 ~/mac-conductor/mac_conductor.py --camera 1`
   (These three need `(.venv)` active: `cd ~/hand-controlled-led/code` then `source .venv/bin/activate` first.)
 
 ## After the demo

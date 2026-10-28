@@ -202,3 +202,133 @@ Built from `FEEDBACK-QUEUE.md`. **Rock hand freed from the gate** (standalone ap
 - **Rotation:** two hands don't just stretch — twist, and the card turns. Same machinery, one more measurement (the angle between your hands).
 - **Portal mode:** the first TikTok — the rectangle between both hands' thumb+pinky tips becomes a live filter window (NEON / THERMAL / PIXELATE…). Shares this program's two-hand tracking wholesale.
 - **Conducting the real Mac:** fingertip drives the actual cursor, pinch drags real windows. Needs a macOS Accessibility permission — a deliberate step, taken with eyes open, after the gestures feel good here.
+
+## v3 — Caitria's picks (Oct 25, evening): capture, real notes, spawn, trash
+
+Built same evening in `code/air_desktop.py` (v3). All v2 feel rules kept
+(cards stay where put, smoothed drag, 26px grab pad, two-hand stretch).
+
+- **Capture card:** both hands up shows the thumb/pinky frame (Portal
+  machinery). Pinch BOTH hands in the air (neither holding a card,
+  starts within 0.35s of each other) -> the framed region is warped
+  straight and becomes a SNAP card at that spot. C key does the same
+  while the frame shows. 1.2s cooldown.
+- **Notes card (real):** reads ~/air-desktop-notes.txt (created with
+  starter text on first run; --notes overrides). The program polls the
+  file's mtime ~1/s, so edits appear on their own; a tap (quick pinch)
+  on the card reloads immediately.
+- **Photo cards (real):** images from ~/Pictures/air-desk (--photos
+  overrides); the folder is created on first run. A tap on a photo
+  card shows the next picture. Empty folder -> placeholder text, and
+  spawning a PHOTO yields a blank card with a toast explaining.
+- **Spawn pad** (top left, "+ NEW: <kind>"): pinch-start on the pad
+  spawns that kind in the pinching hand; the pad rotates
+  PHOTO -> NOTES -> BLANK. N key spawns at centre.
+- **Trash pad** (bottom right): release a dragged card with its centre
+  on the pad to delete it (pad lights up while a dragged card is over
+  it). U restores the last deleted card (stack of 5). R still resets
+  to the default three cards.
+- Tap = grab released within 0.35s with the card moved < 14px.
+
+Field-test order: notes first (edit the file while it runs), then
+spawn/trash, then capture (the double-pinch timing is the new risk).
+
+## v4 — decision cards (Oct 25, evening; Caitria's idea)
+
+Maude deals decisions onto the desk. Queue file ~/air-desktop-queue.txt
+(--queue), plain-text blocks split by a line of only ---, first line =
+the decision's name, # lines are comments. One gold DECISION n OF m
+card at a time (370x265), body wrapped from the block. Answers: drag
+the card onto the YES / DEFER / NO strip along the bottom (the strip
+only shows while a decision card is up), or keys Y / X / D; dragging a
+decision card onto TRASH also counts as DEFER. Each answer appends
+"YYYY-MM-DD hh:mm AM - VERDICT - <title>" to ~/air-desktop-answers.txt
+(--answers) and deals the next decision. The queue file is polled with
+the notes file (~1s): new blocks Maude adds appear mid-run; titles
+answered this session are skipped on reload. R re-deals the current
+decision. Stage 1 transport is manual (files move by hand); a synced
+folder is the designed Stage 2, gated on the household access rules.
+Shipped queue v1 carries two real decisions: Conductor scroll binding
+and the matrix-watch co-dream restriction.
+
+## v5 — mic on/off gestures + voice notes (Oct 25, evening)
+
+Thumbs UP held 0.5s = mic on; thumbs DOWN held 0.5s = mic off
+(HoldGesture latch; pose = classify_pose: all four fingers folded +
+thumb extended clear, tip above/below its base joint; point, pinch,
+victory, open hand and tucked fist all tested NOT to match). Either
+hand, but not while that hand pinches or holds a card. Recording via
+sounddevice (16 kHz mono) to ~/air-desktop-audio/note-<time>.wav;
+transcription on-device via PyObjC Speech (SFSpeechRecognizer,
+requiresOnDeviceRecognition, 45s cap, worker thread + runloop pump;
+auth status 3 required). Results append to the answers file as
+"stamp - NOTE - <decision title or General> - <text>"; failures
+append an untranscribed line carrying the error + wav path, so audio
+is never silently lost. Notes attach to the decision card currently
+up. M key toggles. 120s auto-stop; <0.4s clips discarded. Transcript
+shown on screen ~12s (LAST NOTE panel) for an eyes-on check.
+New installs: sounddevice, pyobjc-framework-Speech. First run raises
+two macOS permission prompts for Terminal (Speech Recognition at
+startup, Microphone at first record). Verified here: py_compile;
+classify_pose against 7 synthetic hands; HoldGesture timeline;
+write_wav roundtrip (16k frames/16 kHz/16-bit); queue regression.
+NOT verifiable here: the Speech framework calls themselves (macOS
+only) — written defensively, every failure degrades to audio-only.
+
+## Stage 2 — Drive pipe LIVE (Oct 25, evening, Caitria's Route A pick)
+
+Drive folder "Air Desk" created at Drive root (id
+18vwommUeCPOmaGYJ-QD4MJVm7NnodCBZ, verified empty by listing). Her
+Mac runs Drive for Desktop, so the design is links, not uploaders:
+she moves ~/air-desktop-answers.txt and ~/air-desktop-queue.txt
+into the synced "Air Desk" folder and symlinks them back to the
+paths the program already uses — zero code change. From then on:
+the program appends answers/notes -> Drive syncs up -> Maude reads
+via the Drive connector. Queue direction: Maude edits the DRIVE
+copy (canonical now; the workspace copy is stale once her move
+lands) -> Drive syncs down -> the program's 1s mtime poll deals
+the new decisions live. Single-writer rule each way. Setup steps
+delivered Oct 25 ~8:10 PM; end-to-end verification = she runs one
+answer/note, then Maude reads the Drive copies back.
+
+## v6 — the F9–F13 fix round (Oct 25, evening; she called it: "fix it all")
+
+F9: cards bigger across the board (photo 340x260, notes/chart
+320x240, blank 300x220, decision 500x360); all card text scales
+with card width (title bar + bodies), decision title at 0.92,
+bodies at 0.66. F10: snap = hold the two-hand frame STEADY 0.8s
+(centroid drift <34px), with a progress bar and a size gate
+(>220x120 px) so resting hands and thumbs-up poses can't trigger
+it; double-pinch capture removed; C key kept. F11: trash pad
+DELETED. Throw-to-delete: drag samples feed release_velocity;
+a release faster than 950 px/s aimed sideways (or 1100 up) starts
+a fling, as does carrying a card's centre out of the frame; exits
+resolve in finish_exit. Slow releases still park the card exactly
+where put (clamp on release only). F13: answer zones = YES right
+side / NO left side (tall, 120 wide) / DEFER top centre; judged by
+overlap_area > 1500 (helper, unit-tested); thrown decision card:
+right=YES, left=NO, top=DEFER. F12: photos folder rescanned on the
+1s poll and pushed into live photo cards; decode failures are
+blacklisted per session and skipped; placeholder now says where
+to put pictures, in large text. Verified here: py_compile;
+overlap_area 4/4; release_velocity + throw classification 8/8
+(incl. bottom-is-never-a-throw); photo bad-file skipping; pose +
+queue regressions. 62.5 KB. Awaiting field test.
+
+---
+
+## v7 (Oct 25, evening — built after the v6 field test)
+
+Her live instructions during the build: the chart goes ("remove it - or it should show something more useful"), voice-typing into Note cards, files reorganized by project. Plus the v6 fallout: throws failed in the field, and a crash to fix.
+
+- THROWS REMOVED entirely (release velocity, fling physics, decision-by-throw): her verdict "the swipe away doesn't work, fast dragging loses card." Cards are always clamped on screen again; a fast drag can no longer lose a card.
+- TRASH is back as a DWELL (her spec): pad bottom-centre; while a card is HELD and any part overlaps the pad, a 0.5 s dwell deletes it (decision card = DEFER, same as trash before); a card merely resting on the pad never deletes; the pad fills red with dwell progress; U undo unchanged.
+- STATUS card replaces the chart: time, fingers up per hand, mic state, decisions done/waiting, photo count — refreshed in the 1 s poll.
+- VOICE-TYPING: hold a NOTES card with one hand, thumbs-up with the other; the transcript is appended to the notes file and appears on the card within a second, instead of going to the answers file. Untranscribed audio still falls back to an answers-file NOTE.
+- CRASH FIXED: ValueError (195,316,3) into (195,294,3) — a held photo card could hang 22 px off the frame edge (v6 exempted grabbed cards from clamping); blit_fit's raw slice then mismatched. v7 clamps always + blit_fit clips its box to the image and forces exact crop shape; the placeholder gradient is clipped the same way. The crash shape is reproduced in the test battery and passes.
+- ORGANIZED PATHS: defaults now live in the project folder — ~/air-desktop/notes.txt, ~/air-desktop/air-desktop-queue.txt, ~/air-desktop/air-desktop-answers.txt, ~/air-desktop/audio/. Startup resolves new-vs-legacy per file (prefer new if it exists, else fall back + print), migrates the notes file and legacy WAVs automatically, and never auto-creates a starter queue at the new path while a legacy queue exists (keeps the Drive symlink step clean).
+- BUILD SLIP, caught pre-ship: the throws-removal edit sliced out blit_fit and wrap_line with the removed code; py_compile passed (runtime-only failure). Caught by a function-inventory diff against the shipped v6 copy; both restored (blit_fit in its hardened form) and the inventory check is now part of the battery.
+- Queue restocked the same night (4 decisions) after the desk ran empty — her rule: answering one should surface the next.
+- v7.1 (same night, her field note "the transcription should visually update a Note when added to the file"): root cause — notes cards drew the TOP of the notes file and stopped when full; dictated lines append at the BOTTOM, so they were saved but below the fold, invisible. Fix: notes cards now render the newest lines (the tail); a voice-typed append refreshes every notes card in the same frame (not via the 1 s poll) and flashes the card border white for 3 s with the new line highlighted. Status cards still read top-down. Drive: air_desktop_v7_1.py, 66,418 B.
+- v7.2 (same night, her field note "defer option is not working"): the zones were judged ONLY at pinch-release. DEFER is the top zone — exactly where the hand leaves the camera view before a clean release registers, so the release (and the verdict) never landed; two-hand holds had the same hole (their release path never ran the zone check at all). Fix: zones are now ALSO judged continuously while a decision card is held (one hand or two): 0.35 s of overlap with a lit zone records the answer, no release needed; release-in-zone still answers instantly; a hand that answers mid-pinch cannot re-grab until it opens once (spent_hands). Geometry + dwell tests pass (centre = no verdict, top = DEFER incl. at scale 1.4, sides unchanged). Drive: air_desktop_v7_2.py, 69,112 B.
+- v7.3 (same night, her field note "Notes is still only showing the text it starts with after transcribing"): the Drive answers file proved the real fault — her test dictations ("Testing testing testing does this update the notes", 9:15 PM) landed in the ANSWERS file, targeted at the decision card. Transcription and the card display were both fine; the ROUTING missed, because v7 routed to notes only if a notes card was being pinched at the exact instant the mic started. Fix: TAP a notes card to arm it as dictation target for 60 s (red dot in the title bar; tap again disarms); holding one at mic start arms it too, so letting go to speak is safe. Notes tail rendering (v7.1) unchanged. Drive: air_desktop_v7_3.py, 71,454 B.
